@@ -174,11 +174,6 @@ const AdminLogin = () => {
             <p>
               Forgot your password? <a href="#reset">Reset it here</a>
             </p>
-            <div className="demo-credentials">
-              <h4>Demo Credentials:</h4>
-              <p>Email: admin@eweek.com</p>
-              <p>Password: admin123</p>
-            </div>
           </div>
         </div>
       </div>
