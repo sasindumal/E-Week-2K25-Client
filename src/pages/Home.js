@@ -457,11 +457,7 @@ const Home = () => {
                     className={`event-gradient bg-gradient-to-br yellow-400 to-yellow-600`}
                   >
                       <div className="event-header">
-                        
-
-                      <div className="event-icon">
-                        <Calendar size={24} color="blue" />
-                      </div>
+                          
                       <span>
                      {categoryIcons[event.category] || <MoreHorizontal size={24} />}
                      </span>
