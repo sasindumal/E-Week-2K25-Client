@@ -44,7 +44,7 @@ const About = () => {
       name: "Aakil Ahamed",
       role:
         "Software Engineer & Cloud Computing Specialist | Passionate about AI, Machine Learning, Deep Learning, and Embedded Systems Development",
-      image: "/aakil.jpeg",
+      image: "/Aakil.jpeg",
       linkedin: "https://www.linkedin.com/in/aakil-ahamed-29a519311/",
     },
   ];
