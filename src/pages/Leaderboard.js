@@ -39,18 +39,20 @@ const Leaderboard = () => {
  const [leaderBoardRows, setLeaderBoardRows] = useState([]);
   let i=0;
   let j=0;
-const logos = [
-  "/e21.jpg", // E21 logo
-  "/e22.png", // E22 logo
-  "/e23.png", // E23 logo
-  "/e24.png"  // E24 logo
-];
+    const logos = [
+        "/e21.jpg", // E21 logo
+        "/e22.png", // E22 logo
+        "/e23.png", // E23 logo
+        "/e24.png", // E24 logo
+        "/staff.png" // Staff logo
+    ];
 
 let batchmemenbers = [
     185 ,
     180 ,
     210  ,
     200 ,
+    50,
 ];
   const fetchUpcomingEvents = async () => {
     try {
@@ -97,7 +99,7 @@ useEffect(() => {
   fetchUpcomingEvents();
   fetchLiveEvents();
   fetchFinishedEvents();
-   fetchLeaderBoard();
+  fetchLeaderBoard();
     
 }, []);  
 
@@ -109,7 +111,7 @@ useEffect(() => {
     if (!response.ok) throw new Error("Failed to fetch leaderboard data");
     const data = await response.json();
 
-    const teams = ["E21", "E22", "E23", "E24"];
+    const teams = ["E21", "E22", "E23", "E24", "Staff"];
     const events = data.EventName || []; // all events are common for all teams
 
     const teamData = teams.map((team) => {
@@ -217,22 +219,21 @@ const getTrendIcon = (trend) => {
     return colors[category] || "from-gray-500 to-gray-600";
   };
 
-  // Filter and sort past events
-  const filteredPastEvents = showPastEvents
-    .filter((event) => {
-      const matchesSearch =
-        eventSearchTerm === "" ||
-        event.title.toLowerCase().includes(eventSearchTerm.toLowerCase()) ||
-        event.category.toLowerCase().includes(eventSearchTerm.toLowerCase())
-        event.winners.toLowerCase().includes(eventSearchTerm.toLowerCase()) 
+    const filteredPastEvents = showPastEvents
+        .filter((event) => {
+            const matchesSearch =
+                eventSearchTerm === "" ||
+                event.title.toLowerCase().includes(eventSearchTerm.toLowerCase()) ||
+                event.category.toLowerCase().includes(eventSearchTerm.toLowerCase()) ||
+                event.winners.toLowerCase().includes(eventSearchTerm.toLowerCase()); // Added missing ||
 
-      const matchesCategory =
-        selectedCategory === "all" || event.category === selectedCategory;
-     
-      const matchesBatch =
-        selectedBatch === "all" || event.winners === selectedBatch;
-      return matchesSearch && matchesCategory && matchesBatch;
-    })
+            const matchesCategory =
+                selectedCategory === "all" || event.category === selectedCategory;
+
+            const matchesBatch =
+                selectedBatch === "all" || event.winners === selectedBatch;
+            return matchesSearch && matchesCategory && matchesBatch;
+        })
     .sort((a, b) => {
       let comparison = 0;
 
@@ -328,32 +329,37 @@ const getTrendIcon = (trend) => {
                       {/* Avatar and Batch */}
                       <div className="batch-info">
                         <div className="batch-avatar">
-                         <img
-                     src={
-                         batch.team === "E21"
-                          ? logos[0]
-                          : batch.team === "E22"
-                          ? logos[1]
-                          : batch.team === "E23"
-                          ? logos[2]
-                          : logos[3]
-                            }
-                          alt={`${batch.team} logo`}
-                           style={{
-                          width: "100px",
-                         height: "auto",
-                           transition: "transform 0.3s ease, box-shadow 0.3s ease",
-                          cursor: "pointer"
-                            }}
-                           onMouseEnter={(e) => {
-                           e.currentTarget.style.transform = "scale(1.1)";
-                           e.currentTarget.style.boxShadow = "0px 4px 12px rgba(0,0,0,0.3)";
-                             }}
-                             onMouseLeave={(e) => {
-                             e.currentTarget.style.transform = "scale(1)";
-                              e.currentTarget.style.boxShadow = "none";
-                          }}
-                           />
+                            <img
+                                src={
+                                    batch.team === "E21"
+                                        ? logos[0]
+                                        : batch.team === "E22"
+                                            ? logos[1]
+                                            : batch.team === "E23"
+                                                ? logos[2]
+                                                : batch.team === "E24"
+                                                    ? logos[3]
+                                                    : batch.team === "Staff"
+                                                        ? logos[4]
+                                                        : logos[0] // ✅ Added default fallback
+                                }
+                                alt={`${batch.team} logo`}
+                                style={{
+                                    width: "100px",
+                                    height: "auto",
+                                    transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                                    cursor: "pointer"
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.transform = "scale(1.1)";
+                                    e.currentTarget.style.boxShadow = "0px 4px 12px rgba(0,0,0,0.3)";
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.transform = "scale(1)";
+                                    e.currentTarget.style.boxShadow = "none";
+                                }}
+                            />
+
                         </div>
                         <h3 className="batch-name">{batch.team}</h3>
                         <div className="batch-members">
