@@ -39,12 +39,14 @@ const AdminDashBoard = () => {
       try {
         const response = await fetch(`${BASE_URL}/api/createEvents/UpcomingEvents`);
         if (!response.ok) {
-          throw new Error("Failed to fetch upcoming events");
+          throw new Error(`Failed to fetch upcoming events: ${response.status}`);
         }
         const data = await response.json();
         setUpcoming(data);
       } catch (error) {
         console.error("Error fetching upcoming events:", error);
+        // Set empty array as fallback
+        setUpcoming([]);
       }
     };
   
@@ -52,12 +54,14 @@ const AdminDashBoard = () => {
       try {
         const response = await fetch(`${BASE_URL}/api/createEvents/LiveEvents`);
         if (!response.ok) {
-          throw new Error("Failed to fetch upcoming events");
+          throw new Error(`Failed to fetch live events: ${response.status}`);
         }
         const data = await response.json();
         setLive(data);
       } catch (error) {
-        console.error("Error fetching upcoming events:", error);
+        console.error("Error fetching live events:", error);
+        // Set empty array as fallback
+        setLive([]);
       }
     };
   
@@ -65,12 +69,14 @@ const AdminDashBoard = () => {
       try {
         const response = await fetch(`${BASE_URL}/api/createEvents/FinishedEvents`);
         if (!response.ok) {
-          throw new Error("Failed to fetch upcoming events");
+          throw new Error(`Failed to fetch finished events: ${response.status}`);
         }
         const data = await response.json();
         setFinished(data);
       } catch (error) {
-        console.error("Error fetching upcoming events:", error);
+        console.error("Error fetching finished events:", error);
+        // Set empty array as fallback
+        setFinished([]);
       }
     };
   

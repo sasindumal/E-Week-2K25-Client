@@ -8,26 +8,37 @@ const EditPointsForm = () => {
   const navigate = useNavigate();
   const [newpoints, setNewpoints] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!newpoints || newpoints < 0) {
+      alert("Please enter a valid points value.");
+      return;
+    }
 
     try {
-      e.preventDefault();   
-      fetch(`${BASE_URL}/api/leaderboard/updatePoints/${team}`, {
+      const response = await fetch(`${BASE_URL}/api/LeaderBoard/updatePoints/${team}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-        },  
+        },
         body: JSON.stringify({ points: newpoints }),
-      })
+      });
 
-   
-  }
-    catch (error) {
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update points");
+      }
+
+      const result = await response.json();
+      console.log("Points updated successfully:", result);
+      alert("Points updated successfully!");
+      navigate("/admin/leaderboard");
+    } catch (error) {
       console.error("Error updating points:", error);
-      alert("Failed to update points. Please try again.");
+      alert("Failed to update points: " + error.message);
     }
-     navigate("/admin/leaderboard"); // Go back after saving
-}
+  };
 
   return (
     <div style={{ display: "flex", justifyContent: "center", marginTop: "50px" }}>

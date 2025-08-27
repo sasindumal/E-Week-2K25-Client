@@ -48,12 +48,21 @@ const handleChangetoLive = async (id) => {
     const data = await response.json();
 
     if (response.ok) {
-      fetchAllEvents();
+      // Refresh all event lists to ensure consistency
+      await Promise.all([
+        fetchAllEvents(),
+        fetchUpcomingEvents(),
+        fetchLiveEvents(),
+        fetchFinishedEvents()
+      ]);
+      alert("Event status updated to Live successfully!");
     } else {
       console.error("Error updating event:", data.message || data.error);
+      alert("Failed to update event status: " + (data.message || data.error));
     }
   } catch (err) {
     console.error("Network error:", err.message);
+    alert("Network error occurred while updating event status: " + err.message);
   }
 };
 
@@ -195,14 +204,14 @@ const handleChangetoLive = async (id) => {
   
     const fetchAllEvents = async () => {
       try {
-        const response = await fetch(`${BASE_URL}/api/createEvents//getEvents`);
+        const response = await fetch(`${BASE_URL}/api/createEvents/getEvents`);
         if (!response.ok) {
-          throw new Error("Failed to fetch upcoming events");
+          throw new Error("Failed to fetch all events");
         }
         const data = await response.json();
         setAllEvents(data);
       } catch (error) {
-        console.error("Error fetching upcoming events:", error);
+        console.error("Error fetching all events:", error);
       }
     };
 
@@ -252,6 +261,10 @@ const handleEdit = (id) => {
   }; 
 
  const handleDelete = async (id) => {
+  if (!window.confirm("Are you sure you want to delete this event? This action cannot be undone.")) {
+    return;
+  }
+
   try {
     const response = await fetch(`${BASE_URL}/api/createEvents/deleteEvent`, {
       method: "POST",
@@ -265,10 +278,19 @@ const handleEdit = (id) => {
       const data = await response.json();
       throw new Error(data.message || "Failed to delete event");
     }
-    // Optionally, refresh events after deletion
-    fetchAllEvents();
+
+    // Refresh all event lists to ensure consistency
+    await Promise.all([
+      fetchAllEvents(),
+      fetchUpcomingEvents(),
+      fetchLiveEvents(),
+      fetchFinishedEvents()
+    ]);
+
+    alert("Event deleted successfully!");
   } catch (error) {
     console.error("Error deleting event:", error);
+    alert("Failed to delete event: " + error.message);
   }
 };
  

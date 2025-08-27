@@ -121,11 +121,14 @@ const EditableEventForm = () => {
       console.log("Sending data:", finalData);
 
       if (response.ok) {
+        const result = await response.json();
+        console.log("Event updated successfully:", result);
         alert("Event updated successfully!");
         navigate("/admin/ManageEvents");
       } else {
         const errorData = await response.json();
-        alert("Update failed: " + (errorData.message || "Unknown error"));
+        console.error("Event update failed:", errorData);
+        alert("Update failed: " + (errorData.error || errorData.message || "Unknown error"));
       }
     } catch (err) {
       console.error("Network error:", err);
@@ -434,4 +437,8 @@ const EditableEventForm = () => {
   );
 };
 
+<<<<<<< Updated upstream
 export default EditableEventForm;
+=======
+export default EditableEventForm;
+>>>>>>> Stashed changes

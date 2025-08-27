@@ -83,9 +83,18 @@ const EventForm = () => {
       );
 
       if (response.ok) {
+<<<<<<< Updated upstream
         // Show success message
         alert("Event created successfully!");
         
+=======
+        const result = await response.json();
+        console.log("Event created successfully:", result);
+
+        // Show success message
+        alert("Event created successfully!");
+
+>>>>>>> Stashed changes
         // Reset form
         setFormData({
           title: "",
@@ -104,12 +113,17 @@ const EventForm = () => {
           maxTeamsPerBatch: "",
           expectedFinishTime: "",
         });
+<<<<<<< Updated upstream
         
+=======
+
+>>>>>>> Stashed changes
         // Navigate back to manage events
         navigate("/admin/ManageEvents");
       } else {
         const errorData = await response.json();
-        alert("Failed: " + (errorData.message || "Unknown error"));
+        console.error("Event creation failed:", errorData);
+        alert("Failed to create event: " + (errorData.error || errorData.message || "Unknown error"));
       }
     } catch (err) {
       console.error("Error:", err);

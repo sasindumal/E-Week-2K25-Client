@@ -26,15 +26,17 @@ const SetResult = () => {
     E23Rank: "",
     E24Rank: "",
     E21Rank: "",
+    StaffRank: "",
     E22Score: "",
     E23Score: "",
     E24Score: "",
     E21Score: "",
+    StaffScore: "",
   });
 
   const [loading, setLoading] = useState(false);
 
-  const options = ["E21", "E22", "E23", "E24"];
+  const options = ["E21", "E22", "E23", "E24", "Staff"];
 
   // Handle dropdown changes
   const handleChange = (e) => {
@@ -94,10 +96,12 @@ const SetResult = () => {
       E23Rank: "",
       E24Rank: "",
       E21Rank: "",
+      StaffRank: "",
       E22Score: "",
       E23Score: "",
       E24Score: "",
       E21Score: "",
+      StaffScore: "",
     };
 
     positionOrder.forEach((position, index) => {
@@ -147,7 +151,7 @@ const SetResult = () => {
 
       // Save results to leaderboard
       const lbRes = await fetch(
-        `${BASE_URL}/api/LeaderBoard/addEvenResult`,
+        `${BASE_URL}/api/LeaderBoard/addEventResult`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -155,7 +159,10 @@ const SetResult = () => {
         }
       );
 
-      if (!lbRes.ok) throw new Error("Failed to update leaderboard");
+      if (!lbRes.ok) {
+        const lbErrorData = await lbRes.json();
+        throw new Error("Failed to update leaderboard: " + (lbErrorData.message || "Unknown error"));
+      }
 
       alert("Result successfully saved!");
       navigate(-1);

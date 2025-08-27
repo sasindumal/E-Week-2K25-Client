@@ -38,7 +38,7 @@ const EventRegistrationModal = ({ event, isOpen, onClose, onSubmit }) => {
   const [registrationStats, setRegistrationStats] = useState({});
 
   // Batch options
-  const batches = ["E20", "E21", "E22", "E23", "E24", "Staff"];
+  const batches = ["E21", "E22", "E23", "E24", "Staff"];
 
   // Initialize form data when event changes
   useEffect(() => {
@@ -73,7 +73,6 @@ const EventRegistrationModal = ({ event, isOpen, onClose, onSubmit }) => {
   const fetchRegistrationStats = (eventId) => {
     // Simulate API call to get current registrations
     const mockStats = {
-      E20: { teams: 1, players: 15 },
       E21: { teams: 2, players: 18 },
       E22: { teams: 1, players: 12 },
       E23: { teams: 0, players: 8 },

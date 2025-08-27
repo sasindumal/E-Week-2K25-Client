@@ -19,11 +19,14 @@ const AdminLeaderBoard = () => {
       const response = await fetch(
         `${BASE_URL}/api/createEvents/UpcomingEvents`
       );
-      if (!response.ok) throw new Error("Failed to fetch upcoming events");
+      if (!response.ok) {
+        throw new Error(`Failed to fetch upcoming events: ${response.status}`);
+      }
       const data = await response.json();
       setUpcomingEvents(data);
     } catch (error) {
       console.error("Error fetching upcoming events:", error);
+      setUpcomingEvents([]);
     }
   };
 
@@ -35,16 +38,18 @@ useEffect(() => {
   useEffect(() => {
     const fetchLeaderBoard = async () => {
       try {
-        const response = await fetch(`${BASE_URL}/api/leaderboard/getLeaderBoard`);
-        if (!response.ok) throw new Error("Failed to fetch leaderboard data");
+        const response = await fetch(`${BASE_URL}/api/LeaderBoard/getLeaderBoard`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch leaderboard data: ${response.status}`);
+        }
         const data = await response.json();
-        const teams = ["E21", "E22", "E23", "E24"];
+        const teams = ["E21", "E22", "E23", "E24", "Staff"];
         const teamData = teams.map((team) => {
           const rankArray = data[`${team}Rank`] || [];
           const totalWonEvents = rankArray.filter(
             (rank) => rank && rank.toLowerCase() === "winners"
           ).length;
-          const members = Math.floor(Math.random() * 10) + 40;
+          const members = team === "Staff" ? Math.floor(Math.random() * 5) + 15 : Math.floor(Math.random() * 10) + 40;
 
           return {
             team,
@@ -62,6 +67,9 @@ useEffect(() => {
         setLeaderBoardRows(sortedTeams);
       } catch (error) {
         console.error("Error fetching leaderboard data:", error);
+        // Set empty array as fallback
+        setLeaderBoardRows([]);
+        alert("Failed to load leaderboard data. Please try refreshing the page.");
       }
     };
 

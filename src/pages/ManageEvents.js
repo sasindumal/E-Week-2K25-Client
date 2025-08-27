@@ -81,24 +81,39 @@ const ManageEvents = () => {
     setUpdatingEventId(id);
     setFadingOutIds((prev) => [...prev, id]);
 
-    setTimeout(async () => {
-      try {
-        const response = await fetch(`${BASE_URL}/api/createEvents/ChangeToLive`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ eventId: id }),
-        });
+    try {
+      setTimeout(async () => {
+        try {
+          const response = await fetch(`${BASE_URL}/api/createEvents/ChangeToLive`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ eventId: id }),
+          });
 
-        const data = await response.json();
+          const data = await response.json();
 
-        if (response.ok) {
-          fetchLiveEvents();
-          fetchUpcomingEvents();
-        } else {
-          console.error("Error updating event:", data.message || data.error);
+          if (response.ok) {
+            // Refresh all event lists to ensure consistency
+            await Promise.all([
+              fetchLiveEvents(),
+              fetchUpcomingEvents(),
+              fetchFinishedEvents()
+            ]);
+            alert("Event moved to Live successfully!");
+          } else {
+            console.error("Error updating event:", data.message || data.error);
+            alert("Failed to update event status: " + (data.message || data.error));
+          }
+        } catch (err) {
+          console.error("Network error:", err.message);
+          alert("Network error occurred: " + err.message);
+        } finally {
+          setUpdatingEventId(null);
+          setFadingOutIds((prev) => prev.filter((eid) => eid !== id));
         }
+<<<<<<< Updated upstream
       } catch (err) {
         console.error("Network error:", err.message);
       } finally {
@@ -106,6 +121,14 @@ const ManageEvents = () => {
         setFadingOutIds((prev) => prev.filter((eid) => eid !== id));
       }
     }, 700);
+=======
+      }, 700);
+    } catch (error) {
+      console.error("Error in handleChangetoLive:", error);
+      setUpdatingEventId(null);
+      setFadingOutIds((prev) => prev.filter((eid) => eid !== id));
+    }
+>>>>>>> Stashed changes
   };
 
   const handleEndEdit = async (id) => {
