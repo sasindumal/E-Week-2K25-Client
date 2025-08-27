@@ -355,68 +355,31 @@ const EditableEventForm = () => {
               />
             </div>
 
-            {/* Winners and Runners-up (only show if status is finished) */}
+            {/* Winners and Runners-up */}
             {formData.status === 'finished' && (
               <>
-                <div className="form-group">
-                  <label className="form-label">
-                    <Trophy size={16} />
-                    Winners
-                  </label>
-                  <input
-                    type="text"
-                    name="winners"
-                    placeholder="Winner team/individual"
-                    value={formData.winners}
-                    onChange={handleChange}
-                    className="form-input"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">
-                    <Trophy size={16} />
-                    First Runner-up
-                  </label>
-                  <input
-                    type="text"
-                    name="firstRunnerUp"
-                    placeholder="First runner-up"
-                    value={formData.firstRunnerUp}
-                    onChange={handleChange}
-                    className="form-input"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">
-                    <Trophy size={16} />
-                    Second Runner-up
-                  </label>
-                  <input
-                    type="text"
-                    name="secondRunnerUp"
-                    placeholder="Second runner-up"
-                    value={formData.secondRunnerUp}
-                    onChange={handleChange}
-                    className="form-input"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">
-                    <Trophy size={16} />
-                    Third Runner-up
-                  </label>
-                  <input
-                    type="text"
-                    name="thirdRunnerUp"
-                    placeholder="Third runner-up"
-                    value={formData.thirdRunnerUp}
-                    onChange={handleChange}
-                    className="form-input"
-                  />
-                </div>
+                {["winners", "firstRunnerUp", "secondRunnerUp", "thirdRunnerUp"].map((field, idx) => (
+                  <div className="form-group" key={field}>
+                    <label className="form-label">
+                      <Trophy size={16} />
+                      {["Winners", "First Runner-up", "Second Runner-up", "Third Runner-up"][idx]}
+                    </label>
+                    <select
+                      name={field}
+                      value={formData[field]}
+                      onChange={handleChange}
+                      className="form-select"
+                      required
+                    >
+                      <option value="">Select</option>
+                      <option value="E21">E21</option>
+                      <option value="E22">E22</option>
+                      <option value="E23">E23</option>
+                      <option value="E24">E24</option>
+                      <option value="Staff">Staff</option>
+                    </select>
+                  </div>
+                ))}
               </>
             )}
 

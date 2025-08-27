@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { Trophy, Medal, Award, Save, ArrowLeft, Calendar, Clock, MapPin, Users } from "lucide-react";
 import "./SetResult.css";
 
 const SetResult = () => {
@@ -166,49 +167,148 @@ const SetResult = () => {
     }
   };
 
-  return (
-    <div className="set-result-page">
-      <h1 className="page-title">Set Event Result</h1>
+  const getPositionIcon = (position) => {
+    switch (position) {
+      case "winners":
+        return <Trophy className="w-5 h-5 text-yellow-500" />;
+      case "firstRunnerUp":
+        return <Medal className="w-5 h-5 text-gray-400" />;
+      case "secondRunnerUp":
+        return <Award className="w-5 h-5 text-amber-600" />;
+      case "thirdRunnerUp":
+        return <Award className="w-5 h-5 text-orange-600" />;
+      default:
+        return null;
+    }
+  };
 
-      <form onSubmit={handleSubmit} className="result-form">
-        {["winners", "firstRunnerUp", "secondRunnerUp", "thirdRunnerUp"].map(
-          (position, idx) => (
-            <label key={position}>
-              {position.replace(/([A-Z])/g, " $1")}:{" "}
-              <select
-                name={position}
-                value={formData[position]}
-                onChange={handleChange}
-                required
-              >
-                <option value="">
-                  Select {position.replace(/([A-Z])/g, " $1")}
-                </option>
-                {options.map((opt) => (
-                  <option
-                    key={opt}
-                    value={opt}
-                    disabled={
-                      Object.values(formData).includes(opt) &&
-                      formData[position] !== opt
-                    }
-                  >
-                    {opt}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )
+  const getPositionLabel = (position) => {
+    switch (position) {
+      case "winners":
+        return "Winner";
+      case "firstRunnerUp":
+        return "1st Runner-up";
+      case "secondRunnerUp":
+        return "2nd Runner-up";
+      case "thirdRunnerUp":
+        return "3rd Runner-up";
+      default:
+        return position;
+    }
+  };
+
+  return (
+    <div className="set-result-container">
+      <div className="set-result-content">
+        {/* Header */}
+        <div className="result-header">
+          <button 
+            onClick={() => navigate(-1)} 
+            className="back-button"
+            title="Go back"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            Back
+          </button>
+          <h1 className="page-title">Set Event Result</h1>
+          <p className="page-subtitle">Finalize competition results and update leaderboard</p>
+        </div>
+
+        {/* Event Info Card */}
+        {event.title && (
+          <div className="event-info-card">
+            <div className="event-header">
+              <h2 className="event-title">{event.title}</h2>
+              <div className="event-status finished">Finished</div>
+            </div>
+            <div className="event-details-grid">
+              <div className="event-detail">
+                <Calendar className="w-4 h-4" />
+                <span>{new Date(event.date).toLocaleDateString()}</span>
+              </div>
+              <div className="event-detail">
+                <Clock className="w-4 h-4" />
+                <span>{event.time}</span>
+              </div>
+              <div className="event-detail">
+                <MapPin className="w-4 h-4" />
+                <span>{event.location}</span>
+              </div>
+              {event.eventType && (
+                <div className="event-detail">
+                  <Users className="w-4 h-4" />
+                  <span>{event.eventType}</span>
+                </div>
+              )}
+            </div>
+          </div>
         )}
 
-        <button
-          type="submit"
-          className="create-edit-button save-button"
-          disabled={loading}
-        >
-          {loading ? "Saving..." : "Save Results"}
-        </button>
-      </form>
+        {/* Results Form */}
+        <div className="results-form-card">
+          <div className="form-header">
+            <h3 className="form-title">Set Competition Results</h3>
+            <p className="form-description">
+              Select the winning teams for each position. Each team can only be selected once.
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="result-form">
+            <div className="positions-grid">
+              {["winners", "firstRunnerUp", "secondRunnerUp", "thirdRunnerUp"].map(
+                (position, idx) => (
+                  <div key={position} className="position-card">
+                    <div className="position-header">
+                      {getPositionIcon(position)}
+                      <h4 className="position-title">{getPositionLabel(position)}</h4>
+                    </div>
+                    <select
+                      name={position}
+                      value={formData[position]}
+                      onChange={handleChange}
+                      required
+                      className="position-select"
+                    >
+                      <option value="">
+                        Select {getPositionLabel(position)}
+                      </option>
+                      {options.map((opt) => (
+                        <option
+                          key={opt}
+                          value={opt}
+                          disabled={
+                            Object.values(formData).includes(opt) &&
+                            formData[position] !== opt
+                          }
+                        >
+                          {opt}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )
+              )}
+            </div>
+
+            <div className="form-actions">
+              <button
+                type="submit"
+                className="save-button"
+                disabled={loading}
+              >
+                {loading ? (
+                  <div className="loading-spinner" />
+                ) : (
+                  <>
+                    <Save className="w-5 h-5" />
+                    Save Results
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   );
 };

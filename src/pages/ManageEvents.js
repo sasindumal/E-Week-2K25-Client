@@ -21,6 +21,9 @@ const ManageEvents = () => {
     if (!window.confirm("Are you sure you want to delete this event?")) return;
 
     try {
+      console.log("Deleting event with ID:", id);
+      console.log("Current events state:", { events: events.length, live: liveEvents.length, finished: finishedEvents.length });
+      
       const response = await fetch(`${BASE_URL}/api/createEvents/deleteEvent`, {
         method: "POST",
         headers: {
@@ -29,18 +32,39 @@ const ManageEvents = () => {
         body: JSON.stringify({ eventId: id }),
       });
 
+      console.log("Delete response status:", response.status);
+
       if (!response.ok) {
         const data = await response.json();
         throw new Error(data.message || "Failed to delete event");
       }
 
+      const result = await response.json();
+      console.log("Delete response:", result);
+
+      // Start fade out animation
       setFadingOutIds((prev) => [...prev, id]);
 
+      // Remove from all state arrays after animation
       setTimeout(() => {
-        setEvents((prev) => prev.filter((event) => event._id !== id));
-        setLiveEvents((prev) => prev.filter((event) => event._id !== id));
-        setFinishedEvents((prev) => prev.filter((event) => event._id !== id));
+        setEvents((prev) => {
+          const filtered = prev.filter((event) => event._id !== id);
+          console.log("Updated events:", filtered.length);
+          return filtered;
+        });
+        setLiveEvents((prev) => {
+          const filtered = prev.filter((event) => event._id !== id);
+          console.log("Updated live events:", filtered.length);
+          return filtered;
+        });
+        setFinishedEvents((prev) => {
+          const filtered = prev.filter((event) => event._id !== id);
+          console.log("Updated finished events:", filtered.length);
+          return filtered;
+        });
         setFadingOutIds((prev) => prev.filter((fadeId) => fadeId !== id));
+        
+        console.log("Event removed from state arrays");
       }, 700);
 
     } catch (error) {
@@ -145,130 +169,255 @@ const ManageEvents = () => {
     );
   };
 
-  const EventCard = ({ event, type, onEdit, onDelete, onChangeToLive, onEndEvent, isUpdating, isFading }) => (
-    <div className={`event-card ${isFading ? 'fade-out' : ''}`}>
-      <div className="event-card-header">
-        <div className="event-title-section">
-          <h3 className="event-title">{event.title}</h3>
-          {getStatusBadge(event.status)}
+  const EventCard = ({ event, type, onEdit, onDelete, onChangeToLive, onEndEvent, isUpdating, isFading }) => {
+    const getEventPriority = () => {
+      if (type === 'live') return 'high';
+      if (type === 'upcoming') return 'medium';
+      return 'low';
+    };
+
+    const getDaysUntilEvent = () => {
+      if (type === 'upcoming') {
+        const today = new Date();
+        const eventDate = new Date(event.date);
+        const diffTime = eventDate - today;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays;
+      }
+      return null;
+    };
+
+    const daysUntilEvent = getDaysUntilEvent();
+
+    return (
+      <div className={`event-card ${isFading ? 'fade-out' : ''} priority-${getEventPriority()}`}>
+        {/* Card Header with Enhanced Status */}
+        <div className="event-card-header">
+          <div className="event-title-section">
+            <div className="event-title-row">
+              <h3 className="event-title">{event.title}</h3>
+              <div className="event-status-container">
+                {getStatusBadge(event.status)}
+                {type === 'live' && (
+                  <div className="live-indicator">
+                    <div className="pulse-dot"></div>
+                    LIVE
+                  </div>
+                )}
+              </div>
+            </div>
+            {event.category && (
+              <div className="event-category">
+                <span className="category-badge">{event.category}</span>
+              </div>
+            )}
+          </div>
+          
+          {/* Priority Indicator */}
+          <div className="priority-indicator">
+            <div className={`priority-dot priority-${getEventPriority()}`}></div>
+          </div>
         </div>
-        <div className="event-category">
-          {event.category && (
-            <span className="category-badge">{event.category}</span>
-          )}
-        </div>
-      </div>
-      
-      <div className="event-details">
-        <div className="event-detail-item">
-          <Calendar size={16} />
-          <span>{new Date(event.date).toLocaleDateString()}</span>
-        </div>
-        <div className="event-detail-item">
-          <Clock size={16} />
-          <span>{event.time}</span>
-        </div>
-        <div className="event-detail-item">
-          <MapPin size={16} />
-          <span>{event.location}</span>
-        </div>
-        {event.eventType && (
+        
+        {/* Enhanced Event Details */}
+        <div className="event-details">
           <div className="event-detail-item">
-            <Users size={16} />
-            <span>{event.eventType}</span>
+            <div className="detail-icon">
+              <Calendar size={18} />
+            </div>
+            <div className="detail-content">
+              <span className="detail-label">Date</span>
+              <span className="detail-value">{new Date(event.date).toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+              })}</span>
+            </div>
+          </div>
+          
+          <div className="event-detail-item">
+            <div className="detail-icon">
+              <Clock size={18} />
+            </div>
+            <div className="detail-content">
+              <span className="detail-label">Time</span>
+              <span className="detail-value">{event.time}</span>
+            </div>
+          </div>
+          
+          <div className="event-detail-item">
+            <div className="detail-icon">
+              <MapPin size={18} />
+            </div>
+            <div className="detail-content">
+              <span className="detail-label">Location</span>
+              <span className="detail-value">{event.location}</span>
+            </div>
+          </div>
+          
+          {event.eventType && (
+            <div className="event-detail-item">
+              <div className="detail-icon">
+                <Users size={18} />
+              </div>
+              <div className="detail-content">
+                <span className="detail-label">Type</span>
+                <span className="detail-value">{event.eventType}</span>
+              </div>
+            </div>
+          )}
+                </div>
+
+        {/* Countdown for Upcoming Events */}
+        {daysUntilEvent !== null && (
+          <div className="event-countdown">
+            <div className="countdown-content">
+              <Clock size={16} />
+              <span className="countdown-text">
+                {daysUntilEvent === 0 ? 'Today!' : 
+                 daysUntilEvent === 1 ? 'Tomorrow!' : 
+                 `${daysUntilEvent} days remaining`}
+              </span>
+            </div>
+            <div className="countdown-progress">
+              <div 
+                className="countdown-fill" 
+                style={{ 
+                  width: `${Math.max(0, Math.min(100, 100 - daysUntilEvent * 10))}%` 
+                }}
+              ></div>
+            </div>
           </div>
         )}
-      </div>
 
-      {event.description && (
-        <div className="event-description">
-          <p>{event.description}</p>
-        </div>
-      )}
+        {/* Enhanced Description */}
+        {event.description && (
+          <div className="event-description">
+            <div className="description-header">
+              <span className="description-icon">📝</span>
+              <span className="description-title">Description</span>
+            </div>
+            <p className="description-text">{event.description}</p>
+          </div>
+        )}
 
-      {type === 'finished' && (
-        <div className="event-results">
-          <h4 className="results-title">Results</h4>
-          <div className="results-grid">
-            {event.winners && (
-              <div className="result-item winner">
-                <Trophy size={16} className="result-icon" />
-                <span className="result-label">Winner:</span>
-                <span className="result-value">{event.winners}</span>
-              </div>
+        {/* Enhanced Results Section */}
+        {type === 'finished' && (
+          <div className="event-results">
+            <div className="results-header">
+              <Trophy size={20} className="results-icon" />
+              <h4 className="results-title">Event Results</h4>
+            </div>
+            <div className="results-grid">
+              {event.winners && (
+                <div className="result-item winner">
+                  <div className="result-icon-container">
+                    <Trophy size={18} className="result-icon" />
+                  </div>
+                  <div className="result-content">
+                    <span className="result-label">Winner</span>
+                    <span className="result-value">{event.winners}</span>
+                  </div>
+                  <div className="result-medal winner-medal">🥇</div>
+                </div>
+              )}
+              {event.firstRunnerUp && (
+                <div className="result-item first-runner">
+                  <div className="result-icon-container">
+                    <Medal size={18} className="result-icon" />
+                  </div>
+                  <div className="result-content">
+                    <span className="result-label">1st Runner-up</span>
+                    <span className="result-value">{event.firstRunnerUp}</span>
+                  </div>
+                  <div className="result-medal first-medal">🥈</div>
+                </div>
+              )}
+              {event.secondRunnerUp && (
+                <div className="result-item second-runner">
+                  <div className="result-icon-container">
+                    <Award size={18} className="result-icon" />
+                  </div>
+                  <div className="result-content">
+                    <span className="result-label">2nd Runner-up</span>
+                    <span className="result-value">{event.secondRunnerUp}</span>
+                  </div>
+                  <div className="result-medal second-medal">🥉</div>
+                </div>
+              )}
+              {event.thirdRunnerUp && (
+                <div className="result-item third-runner">
+                  <div className="result-icon-container">
+                    <Award size={18} className="result-icon" />
+                  </div>
+                  <div className="result-content">
+                    <span className="result-label">3rd Runner-up</span>
+                    <span className="result-value">{event.thirdRunnerUp}</span>
+                  </div>
+                  <div className="result-medal third-medal">🏅</div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Enhanced Action Buttons */}
+        <div className="event-actions">
+          <div className="action-group primary">
+            <button 
+              className="action-btn edit-btn" 
+              title="Edit Event" 
+              onClick={() => onEdit(event._id)}
+            >
+              <Pencil size={16} />
+              <span>Edit</span>
+            </button>
+            
+            {type === 'upcoming' && (
+              <button
+                className="action-btn live-btn"
+                title="Change to Live"
+                onClick={() => onChangeToLive(event._id)}
+                disabled={isUpdating}
+              >
+                {isUpdating ? (
+                  <span className="spinner"></span>
+                ) : (
+                  <>
+                    <RefreshCw size={16} />
+                    <span>Go Live</span>
+                  </>
+                )}
+              </button>
             )}
-            {event.firstRunnerUp && (
-              <div className="result-item first-runner">
-                <Medal size={16} className="result-icon" />
-                <span className="result-label">1st Runner-up:</span>
-                <span className="result-value">{event.firstRunnerUp}</span>
-              </div>
-            )}
-            {event.secondRunnerUp && (
-              <div className="result-item second-runner">
-                <Award size={16} className="result-icon" />
-                <span className="result-label">2nd Runner-up:</span>
-                <span className="result-value">{event.secondRunnerUp}</span>
-              </div>
-            )}
-            {event.thirdRunnerUp && (
-              <div className="result-item third-runner">
-                <Award size={16} className="result-icon" />
-                <span className="result-label">3rd Runner-up:</span>
-                <span className="result-value">{event.thirdRunnerUp}</span>
-              </div>
+            
+            {type === 'live' && (
+              <button 
+                className="action-btn end-btn" 
+                title="End Event & Set Results" 
+                onClick={() => onEndEvent(event._id)}
+              >
+                <Square size={16} />
+                <span>End Event</span>
+              </button>
             )}
           </div>
+          
+          <div className="action-group secondary">
+            <button 
+              className="action-btn delete-btn" 
+              title="Delete Event" 
+              onClick={() => onDelete(event._id)}
+            >
+              <Trash size={16} />
+              <span>Delete</span>
+            </button>
+          </div>
         </div>
-      )}
-
-      <div className="event-actions">
-        <button 
-          className="action-btn edit-btn" 
-          title="Edit Event" 
-          onClick={() => onEdit(event._id)}
-        >
-          <Pencil size={16} />
-          Edit
-        </button>
-        <button 
-          className="action-btn delete-btn" 
-          title="Delete Event" 
-          onClick={() => onDelete(event._id)}
-        >
-          <Trash size={16} />
-          Delete
-        </button>
-        {type === 'upcoming' && (
-          <button
-            className="action-btn live-btn"
-            title="Change to Live"
-            onClick={() => onChangeToLive(event._id)}
-            disabled={isUpdating}
-          >
-            {isUpdating ? (
-              <span className="spinner"></span>
-            ) : (
-              <>
-                <RefreshCw size={16} />
-                Go Live
-              </>
-            )}
-          </button>
-        )}
-        {type === 'live' && (
-          <button 
-            className="action-btn end-btn" 
-            title="End Event & Set Results" 
-            onClick={() => onEndEvent(event._id)}
-          >
-            <Square size={16} />
-            End Event
-          </button>
-        )}
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "#0a0a0f" }}>
