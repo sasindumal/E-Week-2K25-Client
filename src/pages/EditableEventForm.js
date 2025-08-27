@@ -8,27 +8,8 @@ const EditableEventForm = () => {
    const BASE_URL = process.env.REACT_APP_BASE_URL;
 
  useEffect(() => {
-  const fetchAdminData = async () => {
-    const token = localStorage.getItem("adminToken");
-    if (!token) {
-      navigate("/login");
-      return;
-    }
-
-    const res = await fetch(`${BASE_URL}/api/EweekLogin/admin`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    if (res.status === 401) {
-      localStorage.removeItem("adminToken");
-      navigate("/login");
-    } else {
-      const data = await res.json();
-      console.log(data.message);
-    }
-  };
-
-  fetchAdminData();
+  // Removed authentication check - anyone can access
+  console.log("EditableEventForm page accessed");
 }, []);
 
   const [formData, setFormData] = useState({

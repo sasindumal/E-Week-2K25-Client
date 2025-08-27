@@ -30,34 +30,8 @@ const AdminDashBoard = () => {
    const Navigate = useNavigate();
  const BASE_URL = process.env.REACT_APP_BASE_URL;
    useEffect(() => {
-  const fetchAdminData = async () => {
-    const token = localStorage.getItem("adminToken");
-    if (!token) {
-      Navigate("/login");
-      return;
-    }
-    console.log("Token:", token);
-    
-    const res = await fetch(`${BASE_URL}/api/EweekLogin/admin`, {
-  method: "POST", // use POST to send a body
-  headers: {
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({ token }), // send token in body
-  
-});
-
-
-    if (res.status === 401) {
-      localStorage.removeItem("adminToken");
-      Navigate("/login");
-    } else {
-      const data = await res.json();
-     
-    }
-  };
-
-  fetchAdminData();
+  // Removed authentication check - anyone can access admin dashboard
+  console.log("Admin dashboard accessed");
 }, []);
 
 
@@ -156,7 +130,7 @@ const AdminDashBoard = () => {
       <Sidebar />
       <main
         style={{
-          marginLeft: "240px", // <-- IMPORTANT if sidebar fixed width 240px & fixed position
+          marginLeft: "240px",
           padding: "2rem",
           color: "red",
           backgroundColor: "#121212",

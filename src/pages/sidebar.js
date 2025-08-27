@@ -2,13 +2,8 @@ import React from "react";
 import {
   LayoutDashboard,
   Calendar,
-  Zap,
   Trophy,
-  Users,
-  Image,
-  History,
   Shield,
-  Settings,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
@@ -20,7 +15,7 @@ const Sidebar = ({ activeEvents = 0 }) => {
       id: "dashboard",
       label: "Dashboard",
       icon: <LayoutDashboard className="w-5 h-5" />,
-      path: "/admin",
+      path: "/",
       badge: null,
     },
     {
@@ -31,46 +26,10 @@ const Sidebar = ({ activeEvents = 0 }) => {
       badge: activeEvents,
     },
     {
-      id: "skillstorm",
-      label: "SkillStorm",
-      icon: <Zap className="w-5 h-5" />,
-      path: "/admin/skillstorm",
-      badge: null,
-    },
-    {
       id: "leaderboard",
       label: "Leaderboard",
       icon: <Trophy className="w-5 h-5" />,
       path: "/admin/leaderboard",
-      badge: null,
-    },
-    {
-      id: "participants",
-      label: "Participants",
-      icon: <Users className="w-5 h-5" />,
-      path: "/admin/participants",
-      badge: null,
-    },
-   
-    {
-      id: "history",
-      label: "History",
-      icon: <History className="w-5 h-5" />,
-      path: "/admin/history",
-      badge: null,
-    },
-    {
-      id: "admins",
-      label: "Admin Users",
-      icon: <Shield className="w-5 h-5" />,
-      path: "/admin/admins",
-      badge: null,
-    },
-    {
-      id: "settings",
-      label: "Settings",
-      icon: <Settings className="w-5 h-5" />,
-      path: "/admin/settings",
       badge: null,
     },
   ];
