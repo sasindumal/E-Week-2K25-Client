@@ -41,25 +41,21 @@ function App() {
             <Route path="/skillstorm" element={<SkillStorm />} />
             <Route path="/downloads" element={<Downloads />} />
             <Route path="/VideoPlayer" element={<VideoPlayer />} />
-            <Route path="/history" element={<History />} />
-            <Route path="/login" element={<AdminLogin/>} />
-            
-            {/* Admin Routes - Specific routes first */}
             <Route path="/admin/history" element={<AdminHistory />} />
+            <Route path="/history" element={<History />} />
+            <Route path="/admin/*" element={<AdminDashboard />} />
             <Route path="/admin/ManageEvents" element={<ManageEvents />} />
+            <Route path="*" element={<NotFound />} />
             <Route path="/admin/EventForm" element={<EventForm />} />
             <Route path="/admin/EditableEventForm" element={<EditableEventForm />} />
-            <Route path="/admin/SetResult" element={<SetResult />} />
-            <Route path="/admin/skillstorm" element={<AdminSkillStorm />} />
+            <Route path="/admin/SetResult" element={<SetResult />} />'
+            <Route path="/admin/skillstorm" element={<AdminSkillStorm />} />'
             <Route path="/admin/leaderboard" element={<AdminLeaderBoard/>} />
             <Route path="/admin/addHistroy" element={<AddHistory/>} />
+            <Route path="/login" element={<AdminLogin/>} />
             <Route path="/admin/editHistroy/:id" element={<EditHistory />} />
+
             <Route path="/admin/edit-points/:team/:points" element={<EditPointsForm />} />
-            
-            {/* Admin Dashboard - Catch-all route last */}
-            <Route path="/admin" element={<AdminDashboard />} />
-            
-            <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
       </Router>
