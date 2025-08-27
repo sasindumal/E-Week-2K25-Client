@@ -1,16 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { Calendar, Clock, MapPin, Users, Trophy, FileText, Tag, Settings, Save, ArrowLeft } from "lucide-react";
+import "./EventForm.css";
 
 const EditableEventForm = () => {
   const location = useLocation();
   const eventId = location.state?.eventId;
   const navigate = useNavigate();
-   const BASE_URL = process.env.REACT_APP_BASE_URL;
-
- useEffect(() => {
-  // Removed authentication check - anyone can access
-  console.log("EditableEventForm page accessed");
-}, []);
+  const BASE_URL = process.env.REACT_APP_BASE_URL;
 
   const [formData, setFormData] = useState({
     title: "",
@@ -31,11 +28,22 @@ const EditableEventForm = () => {
     expectedFinishTime: "",
   });
 
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingData, setIsLoadingData] = useState(true);
+
   useEffect(() => {
-    if (!eventId) return;
+    console.log("EditableEventForm page accessed");
+  }, []);
+
+  useEffect(() => {
+    if (!eventId) {
+      navigate("/admin/ManageEvents");
+      return;
+    }
 
     const fetchEvent = async () => {
       try {
+        setIsLoadingData(true);
         const res = await fetch(
           `${BASE_URL}/api/createEvents/getEventsById`,
           {
@@ -58,10 +66,7 @@ const EditableEventForm = () => {
           MaxNoOfParticipantsPerTeam: data.MaxNoOfParticipantsPerTeam || "",
           description: data.description || "",
           status: data.status || "upcoming",
-          // Normalize category to match select options
-          category: data.category
-            ? data.category.charAt(0).toUpperCase() + data.category.slice(1).toLowerCase()
-            : "",
+          category: data.category || "",
           pointsConfiguration: data.pointsConfiguration
             ? data.pointsConfiguration.join(",")
             : "",
@@ -74,11 +79,15 @@ const EditableEventForm = () => {
         });
       } catch (err) {
         console.error(err);
+        alert("Failed to load event data");
+        navigate("/admin/ManageEvents");
+      } finally {
+        setIsLoadingData(false);
       }
     };
 
     fetchEvent();
-  }, [eventId]);
+  }, [eventId, navigate, BASE_URL]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -87,6 +96,7 @@ const EditableEventForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
 
     const finalData = {
       eventId,
@@ -120,132 +130,345 @@ const EditableEventForm = () => {
     } catch (err) {
       console.error("Network error:", err);
       alert("Network error occurred");
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  return (
-    <form
-      onSubmit={handleSubmit}
-      style={{
-        backgroundColor: "#1e1e2f",
-        color: "#fff",
-        padding: "2rem",
-        borderRadius: "1rem",
-        boxShadow: "0 0 15px rgba(0, 0, 0, 0.4)",
-        display: "flex",
-        flexDirection: "column",
-        gap: "1rem",
-        maxWidth: "600px",
-        margin: "0 auto",
-      }}
-    >
-      <h2 style={{ textAlign: "center", marginBottom: "1rem", color: "red" }}>
-        Edit Event
-      </h2>
-
-      {/* Other inputs */}
-      {[
-        { label: "Title", name: "title", type: "text", placeholder: "Title" },
-        { label: "Date", name: "date", type: "date" },
-        { label: "Time", name: "time", type: "time" },
-        { label: "Finish Time", name: "expectedFinishTime", type: "time" },
-        { label: "Location", name: "location", type: "text", placeholder: "Location" },
-        {
-          label: "Max Number of Teams/Individuals per Batch",
-          name: "maxTeamsPerBatch",
-          type: "number",
-          placeholder: "e.g. 100",
-        },
-        { label: "Description", name: "description", type: "textarea", placeholder: "Description" },
-        { label: "Status", name: "status", type: "text", placeholder: "Status" },
-        { label: "Points Configuration", name: "pointsConfiguration", type: "text", placeholder: "10,8,6" },
-        { label: "Max Players Per Team", name: "MaxNoOfParticipantsPerTeam", type: "number", placeholder: "e.g. 5" },
-      ].map((input) => (
-        <div key={input.name} style={{ display: "flex", flexDirection: "column" }}>
-          <label style={{ marginBottom: "0.25rem", color: "#ccc" }}>{input.label}</label>
-          {input.type === "textarea" ? (
-            <textarea
-              name={input.name}
-              placeholder={input.placeholder}
-              value={formData[input.name]}
-              onChange={handleChange}
-              style={inputStyle}
-            />
-          ) : (
-            <input
-              type={input.type}
-              name={input.name}
-              placeholder={input.placeholder}
-              value={formData[input.name]}
-              onChange={handleChange}
-              style={inputStyle}
-            />
-          )}
+  if (isLoadingData) {
+    return (
+      <div className="event-form-container">
+        <div className="event-form-card">
+          <div className="loading-state">
+            <div className="spinner large"></div>
+            <p>Loading event data...</p>
+          </div>
         </div>
-      ))}
-
-      {/* Category select */}
-      <div style={{ display: "flex", flexDirection: "column" }}>
-        <label style={{ marginBottom: "0.25rem", color: "#ccc" }}>Category</label>
-        <select
-          name="category"
-          value={formData.category}
-          onChange={handleChange}
-          style={inputStyle}
-        >
-          <option value="">Select Category</option>
-          <option value="Competition">Competition</option>
-          <option value="Workshop">Workshop</option>
-          <option value="Conference">Conference</option>
-          <option value="Ceremony">Ceremony</option>
-          <option value="Social">Social</option>
-          <option value="Core Competition">Core Competition</option>
-          <option value="PC Games">PC Games</option>
-          <option value="Mobile Games">Mobile Games</option>
-          <option value="Other">Other</option>
-        </select>
       </div>
+    );
+  }
 
-      {/* Event type */}
-      <div style={{ display: "flex", flexDirection: "column" }}>
-        <label style={{ color: "#ccc" }}>Event Type:</label>
-        <select
-          name="eventType"
-          value={formData.eventType}
-          onChange={handleChange}
-          style={inputStyle}
-        >
-          <option value="Individual">Individual</option>
-          <option value="Team">Team</option>
-        </select>
+  return (
+    <div className="event-form-container">
+      <div className="event-form-card">
+        <div className="form-header">
+          <h2 className="form-title">Edit Event</h2>
+          <p className="form-subtitle">Update event details for {formData.title}</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="event-form">
+          <div className="form-grid">
+            {/* Title */}
+            <div className="form-group full-width">
+              <label className="form-label">
+                <FileText size={16} />
+                Event Title
+              </label>
+              <input
+                type="text"
+                name="title"
+                placeholder="Enter event title"
+                value={formData.title}
+                onChange={handleChange}
+                className="form-input"
+                required
+              />
+            </div>
+
+            {/* Date and Time */}
+            <div className="form-group">
+              <label className="form-label">
+                <Calendar size={16} />
+                Event Date
+              </label>
+              <input
+                type="date"
+                name="date"
+                value={formData.date}
+                onChange={handleChange}
+                className="form-input"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">
+                <Clock size={16} />
+                Start Time
+              </label>
+              <input
+                type="time"
+                name="time"
+                value={formData.time}
+                onChange={handleChange}
+                className="form-input"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">
+                <Clock size={16} />
+                Expected Finish Time
+              </label>
+              <input
+                type="time"
+                name="expectedFinishTime"
+                value={formData.expectedFinishTime}
+                onChange={handleChange}
+                className="form-input"
+              />
+            </div>
+
+            {/* Location */}
+            <div className="form-group">
+              <label className="form-label">
+                <MapPin size={16} />
+                Location
+              </label>
+              <input
+                type="text"
+                name="location"
+                placeholder="Enter event location"
+                value={formData.location}
+                onChange={handleChange}
+                className="form-input"
+                required
+              />
+            </div>
+
+            {/* Category */}
+            <div className="form-group">
+              <label className="form-label">
+                <Tag size={16} />
+                Category
+              </label>
+              <select
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
+                className="form-select"
+                required
+              >
+                <option value="">Select Category</option>
+                <option value="Team Events">Team Events</option>
+                <option value="Aesthetic Events">Aesthetic Events</option>
+                <option value="Digital Day">Digital Day</option>
+                <option value="Individual Events">Individual Events</option>
+                <option value="Competition">Competition</option>
+                <option value="Workshop">Workshop</option>
+                <option value="Conference">Conference</option>
+                <option value="Ceremony">Ceremony</option>
+                <option value="Social">Social</option>
+                <option value="Core Competition">Core Competition</option>
+                <option value="PC Games">PC Games</option>
+                <option value="Mobile Games">Mobile Games</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            {/* Event Type */}
+            <div className="form-group">
+              <label className="form-label">
+                <Users size={16} />
+                Event Type
+              </label>
+              <select
+                name="eventType"
+                value={formData.eventType}
+                onChange={handleChange}
+                className="form-select"
+                required
+              >
+                <option value="Individual">Individual</option>
+                <option value="Team">Team</option>
+              </select>
+            </div>
+
+            {/* Status */}
+            <div className="form-group">
+              <label className="form-label">
+                <Settings size={16} />
+                Event Status
+              </label>
+              <select
+                name="status"
+                value={formData.status}
+                onChange={handleChange}
+                className="form-select"
+                required
+              >
+                <option value="upcoming">Upcoming</option>
+                <option value="live">Live</option>
+                <option value="finished">Finished</option>
+              </select>
+            </div>
+
+            {/* Max Players Per Team */}
+            <div className="form-group">
+              <label className="form-label">
+                <Users size={16} />
+                Max Players Per Team
+              </label>
+              <input
+                type="number"
+                name="MaxNoOfParticipantsPerTeam"
+                placeholder="e.g. 5"
+                value={formData.MaxNoOfParticipantsPerTeam}
+                onChange={handleChange}
+                className="form-input"
+                min="1"
+                required
+              />
+            </div>
+
+            {/* Max Teams Per Batch */}
+            <div className="form-group">
+              <label className="form-label">
+                <Trophy size={16} />
+                Max Teams/Individuals per Batch
+              </label>
+              <input
+                type="number"
+                name="maxTeamsPerBatch"
+                placeholder="e.g. 100"
+                value={formData.maxTeamsPerBatch}
+                onChange={handleChange}
+                className="form-input"
+                min="1"
+              />
+            </div>
+
+            {/* Points Configuration */}
+            <div className="form-group">
+              <label className="form-label">
+                <Trophy size={16} />
+                Points Configuration
+              </label>
+              <input
+                type="text"
+                name="pointsConfiguration"
+                placeholder="10,8,6,4 (1st,2nd,3rd,4th place points)"
+                value={formData.pointsConfiguration}
+                onChange={handleChange}
+                className="form-input"
+              />
+            </div>
+
+            {/* Winners and Runners-up (only show if status is finished) */}
+            {formData.status === 'finished' && (
+              <>
+                <div className="form-group">
+                  <label className="form-label">
+                    <Trophy size={16} />
+                    Winners
+                  </label>
+                  <input
+                    type="text"
+                    name="winners"
+                    placeholder="Winner team/individual"
+                    value={formData.winners}
+                    onChange={handleChange}
+                    className="form-input"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">
+                    <Trophy size={16} />
+                    First Runner-up
+                  </label>
+                  <input
+                    type="text"
+                    name="firstRunnerUp"
+                    placeholder="First runner-up"
+                    value={formData.firstRunnerUp}
+                    onChange={handleChange}
+                    className="form-input"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">
+                    <Trophy size={16} />
+                    Second Runner-up
+                  </label>
+                  <input
+                    type="text"
+                    name="secondRunnerUp"
+                    placeholder="Second runner-up"
+                    value={formData.secondRunnerUp}
+                    onChange={handleChange}
+                    className="form-input"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">
+                    <Trophy size={16} />
+                    Third Runner-up
+                  </label>
+                  <input
+                    type="text"
+                    name="thirdRunnerUp"
+                    placeholder="Third runner-up"
+                    value={formData.thirdRunnerUp}
+                    onChange={handleChange}
+                    className="form-input"
+                  />
+                </div>
+              </>
+            )}
+
+            {/* Description */}
+            <div className="form-group full-width">
+              <label className="form-label">
+                <FileText size={16} />
+                Event Description
+              </label>
+              <textarea
+                name="description"
+                placeholder="Enter event description..."
+                value={formData.description}
+                onChange={handleChange}
+                className="form-textarea"
+                rows="4"
+              />
+            </div>
+          </div>
+
+          <div className="form-actions">
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={() => navigate("/admin/ManageEvents")}
+              disabled={isLoading}
+            >
+              <ArrowLeft size={16} />
+              Back to Events
+            </button>
+            <button
+              type="submit"
+              className="btn-primary"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <div className="spinner"></div>
+                  Updating Event...
+                </>
+              ) : (
+                <>
+                  <Save size={16} />
+                  Update Event
+                </>
+              )}
+            </button>
+          </div>
+        </form>
       </div>
-
-      <button
-        type="submit"
-        style={{
-          padding: "0.75rem",
-          backgroundColor: "#3b82f6",
-          color: "white",
-          border: "none",
-          borderRadius: "0.5rem",
-          cursor: "pointer",
-          fontWeight: "bold",
-        }}
-      >
-        Update Event
-      </button>
-    </form>
+    </div>
   );
-};
-
-const inputStyle = {
-  padding: "0.75rem",
-  borderRadius: "0.5rem",
-  border: "1px solid #333",
-  backgroundColor: "#2a2a40",
-  color: "white",
-  width: "100%",
-  boxSizing: "border-box",
 };
 
 export default EditableEventForm;
