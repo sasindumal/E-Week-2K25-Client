@@ -30,7 +30,8 @@ const logos = [
   "/e21.jpg", // E21 logo
   "/e22.png", // E22 logo
   "/e23.png", // E23 logo
-  "/e24.png"  // E24 logo
+  "/e24.png", // E24 logo
+    "/staff.png" // Staff logo
 ];
 
 
@@ -63,7 +64,7 @@ const Home = () => {
           const response = await fetch(`${BASE_URL}/api/leaderboard/getLeaderBoard`);
           if (!response.ok) throw new Error("Failed to fetch leaderboard data");
           const data = await response.json();
-          const teams = ["E21", "E22", "E23", "E24"];
+          const teams = ["E21", "E22", "E23", "E24", "Staff"];
           const teamData = teams.map((team) => {
             const rankArray = data[`${team}Rank`] || [];
             const totalWonEvents = rankArray.filter(
@@ -359,6 +360,8 @@ const Home = () => {
                           ? logos[2]
                           : row.team === "E24"
                           ? logos[3]
+                                        : row.team === "Staff"
+                                            ? logos[4]
                           : ""
                       }
                       alt={row.team + " logo"}
@@ -457,11 +460,7 @@ const Home = () => {
                     className={`event-gradient bg-gradient-to-br yellow-400 to-yellow-600`}
                   >
                       <div className="event-header">
-                        
 
-                      <div className="event-icon">
-                        <Calendar size={24} color="blue" />
-                      </div>
                       <span>
                      {categoryIcons[event.category] || <MoreHorizontal size={24} />}
                      </span>

@@ -335,102 +335,125 @@ function getTimeRemaining(startTime, endTime) {
           </div>
         </section>
 
-        {/* Section 01: 7-Day Schedule */}
-        <section className="schedule-section">
-          <div className="container">
-            <div className="section-header-events">
-              <h2 className="section-title-events">
-                7-Day Event Schedule
-                <Calendar className="title-icon" size={32} />
-              </h2>
-              <p className="section-subtitle-events">
-                Complete timeline of all E-Week 2025 activities
-              </p>
-            </div>
-
-            {/* Day Selector */}
-               <div className="day-selector">
-             {MyWeekSchedule.map((dayEvents, index) => (
-                    <button
-                     key={index}
-                     onClick={() => setSelectedDay(index)}
-                     className={`day-button ${selectedDay === index ? "active" : ""}`}
-                   >
-               {/* You can display a day name using index or a helper array */}
-                <span className="day-name">{weekDays[index]}</span>
-
-               {/* Safe access to first event's date */}
-               <span className="day-date">
-                    {dayEvents.length > 0
-              ? new Date(dayEvents[0].date).toLocaleString("default", {
-               month: "long",
-               year: "numeric",
-               })
-              : "No date"}
-               </span>
-
-                 {/* Number of events for that day */}
-                  <span className="day-count">{dayEvents.length} events</span>
-                  </button>
-                        ))}
-                   </div>
-
-
-            {/* Selected Day Events */}
-            <div className="schedule-timeline">
-              <h3 className="timeline-title">
-                {weekDays[selectedDay]} Schedule
-              </h3>
-              <div className="timeline-events">
-                {MyWeekSchedule[selectedDay].map((event, index) => (
-                  <div
-                    key={event._id}
-                    className="timeline-event"
-                    style={{ animationDelay: `${2 * 100}ms` }}
-                  >
-                    <div className="event-time">
-                      <Clock className="w-4 h-4" />
-                      <span>{event.time}</span>
-                    </div>
-                    <div className="event-connector"></div>
-                    <div className="event-card-timeline">
-                      <div className="event-header-timeline">
-                        <h4 className="event-name-timeline">{event.title}</h4>
-                        <span
-                          className={`event-status ${getStatusColor(event.status)}`}
-                        >
-                          {event.status}
-                        </span>
-                      </div>
-                      <div className="event-details-timeline">
-                        <div className="detail-item-timeline">
-                          <MapPin className="w-4 h-4 text-blue-400" />
-                          <span>{event.location}</span>
-                        </div>
-                        <div className="detail-item-timeline">
-                          <Users className="w-4 h-4 text-green-400" />
-                          <span>
-                           {event.MaxNoOfParticipantsPerTeam === 0 || event.MaxNoOfParticipantsPerTeam === null
-                              ? "All are Welcomed"
-                             : event.MaxNoOfParticipantsPerTeam + " participants"} 
-                             </span>
-
-                        </div>
-                      </div>
-                      <div
-                        className={`event-type-badge bg-gradient-to-r from-${getTypeColor(event.category)}`}
-                      >
-                        {event.category}
-                      </div>
-                    </div>
+          {/* Section 01: 7-Day Schedule */}
+          <section className="schedule-section">
+              <div className="container">
+                  <div className="section-header-events">
+                      <h2 className="section-title-events">
+                          7-Day Event Schedule
+                          <Calendar className="title-icon" size={32} />
+                      </h2>
+                      <p className="section-subtitle-events">
+                          Complete timeline of all E-Week 2025 activities
+                      </p>
                   </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
 
-        {/* Section 02: Ongoing Events */}
+                  {/* Day Selector */}
+                  <div className="day-selector">
+                      {MyWeekSchedule.map((dayEvents, index) => (
+                          <button
+                              key={index}
+                              onClick={() => setSelectedDay(index)}
+                              className={`day-button ${selectedDay === index ? "active" : ""}`}
+                          >
+                              <span className="day-name">{weekDays[index]}</span>
+                              <span className="day-date">
+            {dayEvents.length > 0
+                ? new Date(dayEvents[0].date).toLocaleString("default", {
+                    month: "long",
+                    year: "numeric",
+                })
+                : "No date"}
+          </span>
+                              <span className="day-count">{dayEvents.length} events</span>
+                          </button>
+                      ))}
+                  </div>
+
+                  {/* Selected Day Events */}
+                  <div className="schedule-timeline">
+                      <h3 className="timeline-title">
+                          {weekDays[selectedDay]} Schedule
+                      </h3>
+                      <div className="timeline-events">
+                          {MyWeekSchedule[selectedDay]
+                              .sort((a, b) => {
+                                  // Helper function to convert time string to comparable format
+                                  const timeToMinutes = (timeStr) => {
+                                      if (!timeStr) return 0;
+
+                                      // Handle different time formats
+                                      const cleanTime = timeStr.trim().toLowerCase();
+
+                                      // Extract time part (remove any extra text)
+                                      const timeMatch = cleanTime.match(/(\d{1,2}):(\d{2})\s*(am|pm)?/);
+                                      if (!timeMatch) return 0;
+
+                                      let hours = parseInt(timeMatch[1]);
+                                      const minutes = parseInt(timeMatch[2]);
+                                      const ampm = timeMatch[3];
+
+                                      // Convert to 24-hour format
+                                      if (ampm === 'pm' && hours !== 12) {
+                                          hours += 12;
+                                      } else if (ampm === 'am' && hours === 12) {
+                                          hours = 0;
+                                      }
+
+                                      return hours * 60 + minutes;
+                                  };
+
+                                  return timeToMinutes(a.time) - timeToMinutes(b.time);
+                              })
+                              .map((event, index) => (
+                                  <div
+                                      key={event._id}
+                                      className="timeline-event"
+                                      style={{ animationDelay: `${index * 100}ms` }}
+                                  >
+                                      <div className="event-time">
+                                          <Clock className="w-4 h-4" />
+                                          <span>{event.time}</span>
+                                      </div>
+                                      <div className="event-connector"></div>
+                                      <div className="event-card-timeline">
+                                          <div className="event-header-timeline">
+                                              <h4 className="event-name-timeline">{event.title}</h4>
+                                              <span
+                                                  className={`event-status ${getStatusColor(event.status)}`}
+                                              >
+                    {event.status}
+                  </span>
+                                          </div>
+                                          <div className="event-details-timeline">
+                                              <div className="detail-item-timeline">
+                                                  <MapPin className="w-4 h-4 text-blue-400" />
+                                                  <span>{event.location}</span>
+                                              </div>
+                                              <div className="detail-item-timeline">
+                                                  <Users className="w-4 h-4 text-green-400" />
+                                                  <span>
+                      {event.MaxNoOfParticipantsPerTeam === 0 || event.MaxNoOfParticipantsPerTeam === null
+                          ? "All are Welcomed"
+                          : event.MaxNoOfParticipantsPerTeam + " participants"}
+                    </span>
+                                              </div>
+                                          </div>
+                                          <div
+                                              className={`event-type-badge bg-gradient-to-r from-${getTypeColor(event.category)}`}
+                                          >
+                                              {event.category}
+                                          </div>
+                                      </div>
+                                  </div>
+                              ))}
+                      </div>
+                  </div>
+              </div>
+          </section>
+
+
+          {/* Section 02: Ongoing Events */}
         <section className="ongoing-section">
           <div className="container">
             <div className="section-header-events">

@@ -3,214 +3,196 @@ import { useLocation, useNavigate } from "react-router-dom";
 import "./SetResult.css";
 
 const SetResult = () => {
-  const BASE_URL = process.env.REACT_APP_BASE_URL;
+    const BASE_URL = process.env.REACT_APP_BASE_URL;
 
-  const location = useLocation();
-  const navigate = useNavigate();
-  const eventId = location.state?.eventId || "";
+    const location = useLocation();
+    const navigate = useNavigate();
+    const eventId = location.state?.eventId || "";
 
-  const [event, setEvent] = useState({});
-  const [formData, setFormData] = useState({
-    winners: "",
-    firstRunnerUp: "",
-    secondRunnerUp: "",
-    thirdRunnerUp: "",
-    status: "finished",
-  });
+    const options = ["E21", "E22", "E23", "E24", "Staff"];
 
-  const [secondFormData, setSecondFormData] = useState({
-    eventId: eventId,
-    eventName: "",
-    E22Rank: "",
-    E23Rank: "",
-    E24Rank: "",
-    E21Rank: "",
-    E22Score: "",
-    E23Score: "",
-    E24Score: "",
-    E21Score: "",
-  });
-
-  const [loading, setLoading] = useState(false);
-
-  const options = ["E21", "E22", "E23", "E24"];
-
-  // Handle dropdown changes
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  // Check if same participant is selected twice
-  const hasDuplicates = () => {
-    const selections = [
-      formData.winners,
-      formData.firstRunnerUp,
-      formData.secondRunnerUp,
-      formData.thirdRunnerUp,
-    ].filter(Boolean);
-    return new Set(selections).size !== selections.length;
-  };
-
-  // Fetch event data once
-  useEffect(() => {
-    const fetchEvent = async () => {
-      try {
-        const response = await fetch(
-          `${BASE_URL}/api/createEvents/getEventsById`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ eventId }),
-          }
-        );
-        if (!response.ok) throw new Error("Failed to fetch event details");
-        const data = await response.json();
-        setEvent(data);
-      } catch (error) {
-        console.error("Error fetching event:", error);
-      }
-    };
-    fetchEvent();
-  }, [eventId]);
-
-  // Update secondFormData whenever event or formData changes
-  useEffect(() => {
-    if (!event.pointsConfiguration) return;
-
-    const positionOrder = [
-      "winners",
-      "firstRunnerUp",
-      "secondRunnerUp",
-      "thirdRunnerUp",
-    ];
-    const scores = event.pointsConfiguration;
-
-    const updatedFormData = {
-      eventId: eventId,
-      eventName: event.title || "",
-      E22Rank: "",
-      E23Rank: "",
-      E24Rank: "",
-      E21Rank: "",
-      E22Score: "",
-      E23Score: "",
-      E24Score: "",
-      E21Score: "",
-    };
-
-    positionOrder.forEach((position, index) => {
-      const team =
-        position === "winners"
-          ? formData.winners || event.winners
-          : position === "firstRunnerUp"
-          ? formData.firstRunnerUp || event.firstRunnerUp
-          : position === "secondRunnerUp"
-          ? formData.secondRunnerUp || event.secondRunnerUp
-          : formData.thirdRunnerUp || event.thirdRunnerUp;
-
-      if (team) {
-        updatedFormData[`${team}Rank`] = position;
-        updatedFormData[`${team}Score`] = scores[index];
-      }
+    const [event, setEvent] = useState({});
+    const [formData, setFormData] = useState({
+        winners: "",
+        firstRunnerUp: "",
+        secondRunnerUp: "",
+        thirdRunnerUp: "",
+        status: "finished",
     });
 
-    setSecondFormData(updatedFormData);
-  }, [event, eventId, formData]);
+    const [secondFormData, setSecondFormData] = useState({
+        eventId: eventId,
+        eventName: "",
+        E22Rank: "",
+        E23Rank: "",
+        E24Rank: "",
+        E21Rank: "",
+        StaffRank: "",
+        E22Score: "",
+        E23Score: "",
+        E24Score: "",
+        E21Score: "",
+        StaffScore: "",
+    });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+    const [loading, setLoading] = useState(false);
 
-    if (hasDuplicates()) {
-      alert("Please select different participants for each position.");
-      return;
-    }
+    // Fetch event data
+    useEffect(() => {
+        const fetchEvent = async () => {
+            try {
+                const response = await fetch(`${BASE_URL}/api/createEvents/getEventsById`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ eventId }),
+                });
+                if (!response.ok) throw new Error("Failed to fetch event details");
+                const data = await response.json();
+                setEvent(data);
+            } catch (err) {
+                console.error(err);
+            }
+        };
+        fetchEvent();
+    }, [eventId]);
 
-    try {
-      setLoading(true);
+    // Handle dropdown change
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prev) => ({ ...prev, [name]: value }));
+    };
 
-      // Save results to terminateEvent endpoint
-      const res = await fetch(
-        `${BASE_URL}/api/createEvents/terminateEvent`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ eventId, ...formData }),
+    // Check for duplicates
+    const hasDuplicates = () => {
+        const selections = [
+            formData.winners,
+            formData.firstRunnerUp,
+            formData.secondRunnerUp,
+            formData.thirdRunnerUp,
+        ].filter(Boolean);
+        return new Set(selections).size !== selections.length;
+    };
+
+    // Prepare secondFormData with scores and ranks
+    useEffect(() => {
+        if (!event.pointsConfiguration) return;
+
+        const positions = ["winners", "firstRunnerUp", "secondRunnerUp", "thirdRunnerUp"];
+        const scores = event.pointsConfiguration;
+
+        const updated = {
+            eventId: eventId,
+            eventName: event.title || "",
+            E22Rank: "",
+            E23Rank: "",
+            E24Rank: "",
+            E21Rank: "",
+            StaffRank: "",
+            E22Score: "",
+            E23Score: "",
+            E24Score: "",
+            E21Score: "",
+            StaffScore: "",
+        };
+
+        positions.forEach((pos, idx) => {
+            const team = formData[pos] || event[pos];
+            if (team && options.includes(team)) {
+                updated[`${team}Rank`] = pos;
+                updated[`${team}Score`] = scores[idx];
+            }
+        });
+
+        setSecondFormData(updated);
+    }, [event, eventId, formData]);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        // Validate selections
+        const invalidSelection = ["winners", "firstRunnerUp", "secondRunnerUp", "thirdRunnerUp"].some(
+            (key) => !options.includes(formData[key])
+        );
+        if (invalidSelection) {
+            alert("Please select valid participants for all positions.");
+            return;
         }
-      );
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || "Failed to set result");
-      }
-
-      // Save results to leaderboard
-      const lbRes = await fetch(
-        `${BASE_URL}/api/LeaderBoard/addEvenResult`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(secondFormData),
+        if (hasDuplicates()) {
+            alert("Please select different participants for each position.");
+            return;
         }
-      );
 
-      if (!lbRes.ok) throw new Error("Failed to update leaderboard");
+        try {
+            setLoading(true);
 
-      alert("Result successfully saved!");
-      navigate(-1);
-    } catch (err) {
-      console.error(err);
-      alert("Error saving result: " + err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+            const filteredFormData = Object.fromEntries(
+                Object.entries(formData).filter(([_, v]) => v)
+            );
 
-  return (
-    <div className="set-result-page">
-      <h1 className="page-title">Set Event Result</h1>
+            // Update event
+            const res = await fetch(`${BASE_URL}/api/createEvents/terminateEvent`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ eventId, ...filteredFormData }),
+            });
 
-      <form onSubmit={handleSubmit} className="result-form">
-        {["winners", "firstRunnerUp", "secondRunnerUp", "thirdRunnerUp"].map(
-          (position, idx) => (
-            <label key={position}>
-              {position.replace(/([A-Z])/g, " $1")}:{" "}
-              <select
-                name={position}
-                value={formData[position]}
-                onChange={handleChange}
-                required
-              >
-                <option value="">
-                  Select {position.replace(/([A-Z])/g, " $1")}
-                </option>
-                {options.map((opt) => (
-                  <option
-                    key={opt}
-                    value={opt}
-                    disabled={
-                      Object.values(formData).includes(opt) &&
-                      formData[position] !== opt
-                    }
-                  >
-                    {opt}
-                  </option>
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.message || "Failed to set result");
+            }
+
+            // Update leaderboard
+            const lbRes = await fetch(`${BASE_URL}/api/LeaderBoard/addEventResult`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(secondFormData),
+            });
+
+            if (!lbRes.ok) {
+                const lbErrorData = await lbRes.json();
+                throw new Error(lbErrorData.message || "Failed to update leaderboard");
+            }
+
+            alert("Result successfully saved!");
+            navigate(-1);
+        } catch (err) {
+            console.error(err);
+            alert("Error saving result: " + err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="set-result-page">
+            <h1 className="page-title">Set Event Result</h1>
+
+            <form onSubmit={handleSubmit} className="result-form">
+                {["winners", "firstRunnerUp", "secondRunnerUp", "thirdRunnerUp"].map((pos) => (
+                    <label key={pos}>
+                        {pos.replace(/([A-Z])/g, " $1")}:{" "}
+                        <select name={pos} value={formData[pos]} onChange={handleChange} required>
+                            <option value="">Select {pos.replace(/([A-Z])/g, " $1")}</option>
+                            {options.map((opt) => (
+                                <option
+                                    key={opt}
+                                    value={opt}
+                                    disabled={Object.values(formData).includes(opt) && formData[pos] !== opt}
+                                >
+                                    {opt}
+                                </option>
+                            ))}
+                        </select>
+                    </label>
                 ))}
-              </select>
-            </label>
-          )
-        )}
 
-        <button
-          type="submit"
-          className="create-edit-button save-button"
-          disabled={loading}
-        >
-          {loading ? "Saving..." : "Save Results"}
-        </button>
-      </form>
-    </div>
-  );
+                <button type="submit" disabled={loading}>
+                    {loading ? "Saving..." : "Save Results"}
+                </button>
+            </form>
+        </div>
+    );
 };
 
 export default SetResult;
