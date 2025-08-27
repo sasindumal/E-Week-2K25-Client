@@ -511,7 +511,7 @@ const Home = () => {
       </section>
 
       {/* Premium Sponsors Showcase */}
-      <section className="modern-section sponsors-section">
+        {/* <section className="modern-section sponsors-section">
         <div className="container">
           <div className="section-header-modern">
             <h2 className="section-title-modern">
@@ -545,7 +545,7 @@ const Home = () => {
             </div>
           </div>
         </div>
-      </section>
+      </section>*/}
 
       {/* Modern Features */}
       <section className="modern-section features-section">
