@@ -189,13 +189,14 @@ const Downloads = () => {
                   </div>
 
                     <div className="download-cta">
-                        <button
-                            className="download-btn primary"
-                            onClick={() => window.open(activePlatform.downloadUrl, "_blank")}
+                        <a
+                            href="/E-Week-2k25.apk"
+                            download
+                            className="download-btn primary flex items-center gap-2"
                         >
                             <Download className="w-6 h-6" />
                             Download for {activePlatform.name}
-                        </button>
+                        </a>
                         <button className="download-btn secondary">
                             View Release Notes
                         </button>
