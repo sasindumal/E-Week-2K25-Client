@@ -32,25 +32,8 @@ const Downloads = () => {
         "Team collaboration tools",
         "Photo sharing capabilities",
       ],
-      downloadUrl: "#",
-    },
-    {
-      id: "ios",
-      name: "IOS",
-      icon: <Apple className="w-8 h-8" />,
-      color: "from-gray-500 to-gray-600",
-      version: "v2.1.0",
-      size: "89.7 MB",
-      requirements: "macOS 11.0+",
-      features: [
-        "Native desktop experience",
-        "Advanced analytics dashboard",
-        "Multi-window support",
-        "Keyboard shortcuts",
-        "System integration",
-      ],
-      downloadUrl: "#",
-    },
+      downloadUrl: "https://www.mediafire.com/file/7inhfktps38wvge/E-Week-2k25%25281.0%2529.apk/file",
+    }
 
   ];
 
@@ -205,15 +188,18 @@ const Downloads = () => {
                     </div>
                   </div>
 
-                  <div className="download-cta">
-                    <button className="download-btn primary">
-                      <Download className="w-6 h-6" />
-                      Download for {activePlatform.name}
-                    </button>
-                    <button className="download-btn secondary">
-                      View Release Notes
-                    </button>
-                  </div>
+                    <div className="download-cta">
+                        <button
+                            className="download-btn primary"
+                            onClick={() => window.open(activePlatform.downloadUrl, "_blank")}
+                        >
+                            <Download className="w-6 h-6" />
+                            Download for {activePlatform.name}
+                        </button>
+                        <button className="download-btn secondary">
+                            View Release Notes
+                        </button>
+                    </div>
                 </div>
               </div>
             </div>
