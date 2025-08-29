@@ -1,48 +1,19 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
+import { useEventStatus } from "../hooks/use-event-status";
 
-const CountdownTimer = ({ targetDate }) => {
-  const [timeLeft, setTimeLeft] = useState({
-    days: 0,
-    hours: 0,
-    minutes: 0,
-    seconds: 0,
-  });
-  const [isExpired, setIsExpired] = useState(false);
+const CountdownTimer = ({ targetDate, endDate = "2025-08-03T18:00:00" }) => {
+  const { status, timeLeft } = useEventStatus(targetDate, endDate);
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      const now = new Date().getTime();
-      const target = new Date(targetDate).getTime();
-      const difference = target - now;
-
-      if (difference > 0) {
-        const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-        const hours = Math.floor(
-          (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
-        );
-        const minutes = Math.floor(
-          (difference % (1000 * 60 * 60)) / (1000 * 60),
-        );
-        const seconds = Math.floor((difference % (1000 * 60)) / 1000);
-
-        setTimeLeft({ days, hours, minutes, seconds });
-        setIsExpired(false);
-      } else {
-        setIsExpired(true);
-        clearInterval(timer);
-      }
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [targetDate]);
-
-  if (isExpired) {
+  if (status === 'concluded') {
     return (
       <div className="countdown text-center">
         <h2 className="text-4xl font-bold text-red mb-4">
-          E-WEEK 2K25 HAS BEGUN!
+          E-WEEK 2K25 HAS CONCLUDED!
         </h2>
-        <p className="text-xl">The event is now live!</p>
+        <p className="text-xl">Thank you for an amazing journey! 🎉</p>
+        <p className="text-lg mt-2 opacity-80">
+          The warriors have written their history. Until next time! ⚔️
+        </p>
       </div>
     );
   }
@@ -56,7 +27,20 @@ const CountdownTimer = ({ targetDate }) => {
 
   return (
     <div className="countdown">
-      <h2 className="countdown-title">Countdown to E-Week 2K25</h2>
+      <h2 className="countdown-title">
+        {status === 'live' ? "Time Until E-Week 2K25 Ends" : "Countdown to E-Week 2K25"}
+      </h2>
+
+      {status === 'live' && (
+        <div className="text-center mb-4">
+          <div className="inline-flex items-center gap-2 bg-red-600/20 border border-red-500/30 rounded-full px-4 py-2 mb-3">
+            <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+            <span className="text-red-400 font-medium">LIVE NOW</span>
+          </div>
+          <p className="text-lg text-white/90">The battle is raging! Warriors are writing history! ⚔️</p>
+        </div>
+      )}
+
       <div className="countdown-grid">
         {timeUnits.map((unit) => (
           <div key={unit.label} className="countdown-item">
@@ -67,8 +51,12 @@ const CountdownTimer = ({ targetDate }) => {
           </div>
         ))}
       </div>
+
       <p className="countdown-date">
-        August 25, 2025 • Faculty of Engineering • University of Jaffna
+        {status === 'live'
+          ? "The Odyssey Continues • Faculty of Engineering • University of Jaffna"
+          : "July 30 - August 3, 2025 • Faculty of Engineering • University of Jaffna"
+        }
       </p>
     </div>
   );

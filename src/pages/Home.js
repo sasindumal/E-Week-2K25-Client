@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import Layout from "../components/Layout";
 import CountdownTimer from "../components/CountdownTimer";
 import { useNavigate } from "react-router-dom";
+import { useEventStatus } from "../hooks/use-event-status";
 
 import {
     Badge, Users, Speaker, MoreHorizontal,
@@ -39,6 +40,41 @@ const logos = [
 const Home = () => {
   const BASE_URL = process.env.REACT_APP_BASE_URL;
   const navigate=useNavigate();
+
+  // Event dates - change these to control the countdown and hero text
+  const eventStartDate = "2025-08-30T08:00:00";
+  const eventEndDate = "2025-09-05T18:30:00";
+
+  // Get current event status
+  const { status } = useEventStatus(eventStartDate, eventEndDate);
+
+  // Dynamic content based on event status
+  const getHeroContent = () => {
+    switch (status) {
+      case 'upcoming':
+        return {
+          subtitle: "Warriors of the Odyssey, rise! The storm is near, and only the brave shall write history.",
+          highlight: "Get ready for the battle."
+        };
+      case 'live':
+        return {
+          subtitle: "The Odyssey has begun! Warriors are forging their destiny as the battle rages across the engineering realm.",
+          highlight: "History is being written right now."
+        };
+      case 'concluded':
+        return {
+          subtitle: "The great Odyssey has ended! Warriors have proven their might and written their legends in the halls of engineering.",
+          highlight: "The legacy lives on forever."
+        };
+      default:
+        return {
+          subtitle: "Warriors of the Odyssey, rise! The storm is near, and only the brave shall write history.",
+          highlight: "Get ready for the battle."
+        };
+    }
+  };
+
+  const heroContent = getHeroContent();
   const [isRegistered, setIsRegistered] = useState(false);
   const [email, setEmail] = useState("");
   const [showNotificationModal, setShowNotificationModal] = useState(false);
@@ -140,7 +176,7 @@ const Home = () => {
       name: "MELWA",
       logo: <img src="/Melwa.jpeg" alt="Melwa Logo" width="150" />,
       tier: "platinum",
-      description: "Sri Lanka’s premier diversified industrial powerhouse.",
+      description: "Sri Lanka���s premier diversified industrial powerhouse.",
     },
   ];
 
@@ -273,18 +309,20 @@ const Home = () => {
               <p className="countdown-title">Organized By E22</p>
 
               <p className="modern-subtitle">
-                Warriors of the Odyssey, rise! The storm is near, and only the
-                brave shall write history.
+                {heroContent.subtitle}
                 <br />
                 <span className="highlight-text">
-                  Get ready into the battle.
+                  {heroContent.highlight}
                 </span>
               </p>
             </div>
 
             {/* Enhanced Countdown */}
             <div className="modern-countdown">
-              <CountdownTimer targetDate="2025-08-30T08:00:00" />
+              <CountdownTimer
+                targetDate={eventStartDate}
+                endDate={eventEndDate}
+              />
             </div>
 
             {/* Modern CTA Buttons */}
