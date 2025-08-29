@@ -55,7 +55,7 @@ const CountdownTimer = ({ targetDate, endDate = "2025-08-03T18:00:00" }) => {
       <p className="countdown-date">
         {status === 'live'
           ? "The Odyssey Continues • Faculty of Engineering • University of Jaffna"
-          : "July 30 - August 3, 2025 • Faculty of Engineering • University of Jaffna"
+          : "August 30 - September 05, 2025 • Faculty of Engineering • University of Jaffna"
         }
       </p>
     </div>
