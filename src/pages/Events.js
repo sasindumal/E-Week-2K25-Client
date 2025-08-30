@@ -274,24 +274,41 @@ function getTimeRemaining(startTime, endTime) {
     .sort((a, b) => {
       let comparison = 0;
 
+      const cmpDateTime = (x, y) => {
+        const dx = new Date(x.date || 0).getTime();
+        const dy = new Date(y.date || 0).getTime();
+        if (dx !== dy) return dx - dy;
+        const tmin = (t) => {
+          if (!t) return 0;
+          const m = String(t).trim().toLowerCase().match(/(\d{1,2}):(\d{2})\s*(am|pm)?/);
+          if (!m) return 0;
+          let h = parseInt(m[1], 10);
+          const mns = parseInt(m[2], 10);
+          const ap = m[3];
+          if (ap === 'pm' && h !== 12) h += 12; else if (ap === 'am' && h === 12) h = 0;
+          return h * 60 + mns;
+        };
+        return tmin(x.time) - tmin(y.time);
+      };
+
       switch (sortBy) {
         case "time":
-          // Simple time comparison for demo - in real app would parse dates properly
-          comparison = a.time.localeCompare(b.time);
+          comparison = cmpDateTime(a, b);
           break;
         case "name":
-          comparison = a.name.localeCompare(b.name);
+          comparison = (a.title || a.name || '').localeCompare(b.title || b.name || '');
           break;
-        case "participants":
-          const aParticipants = parseInt(a.participants.replace(/\D/g, ""));
-          const bParticipants = parseInt(b.participants.replace(/\D/g, ""));
-          comparison = bParticipants - aParticipants;
+        case "participants": {
+          const aParticipants = Number(a.participantsCount || 0);
+          const bParticipants = Number(b.participantsCount || 0);
+          comparison = aParticipants - bParticipants;
           break;
+        }
         case "category":
-          comparison = a.category.localeCompare(b.category);
+          comparison = (a.category || '').localeCompare(b.category || '');
           break;
         default:
-          comparison = 0;
+          comparison = cmpDateTime(a, b);
       }
 
       return sortOrder === "asc" ? comparison : -comparison;
