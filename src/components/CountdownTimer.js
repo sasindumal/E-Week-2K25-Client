@@ -6,11 +6,18 @@ const CountdownTimer = ({ targetDate, endDate = "2025-08-03T18:00:00" }) => {
 
   if (status === 'concluded') {
     return (
-      <div className="countdown text-center">
-        <h2 className="text-4xl font-bold text-red mb-4">
+      <div className="countdown text-center animate-fade-in">
+        <h2 className="text-4xl font-bold text-red mb-4 animate-slide-up">
           E-WEEK 2K25 HAS CONCLUDED!
         </h2>
-        <p className="text-xl">Thank you for an amazing journey! 🎉</p>
+        <div className="inline-flex items-center gap-3 justify-center mb-3 animate-slide-up delay-300">
+          <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+          <span className="text-red-400 font-semibold tracking-wide">RESULTS</span>
+        </div>
+        <p className="text-3xl font-extrabold text-white mb-2 animate-slide-up delay-500 animate-glow">
+          Congratulations E22 🎉
+        </p>
+        <p className="text-xl">Thank you for an amazing journey!</p>
         <p className="text-lg mt-2 opacity-80">
           The warriors have written their history. Until next time! ⚔️
         </p>
